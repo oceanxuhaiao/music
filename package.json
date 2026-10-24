@@ -1,0 +1,90 @@
+{
+  "name": "cortico-world-netease-companion",
+  "version": "0.3.6",
+  "type": "module",
+  "description": "一起听，让歌单成为你和 Coo 的共同话题。切歌后参考网易云热评聊两句，评论频率与字数可调，快切不补评。Windows 非官方陪听扩展。",
+  "license": "MIT",
+  "keywords": [
+    "cortico-world",
+    "cortico",
+    "netease",
+    "music"
+  ],
+  "os": [
+    "win32"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "main": "./src/index.ts",
+  "cortico": {
+    "kind": "world",
+    "api": 6,
+    "displayName": "一起听 · 网易云音乐",
+    "tags": [
+      "companion",
+      "experimental",
+      "sensitive-data",
+      "external-setup",
+      "internet"
+    ],
+    "describe": "describe.json",
+    "icon": "assets/icon.png",
+    "locales": {
+      "zh": {
+        "displayName": "一起听 · 网易云音乐",
+        "description": "一起听，让歌单成为你和 Coo 的共同话题。切歌后参考网易云热评聊两句，评论频率与字数可调，快切不补评。Windows 非官方陪听扩展。"
+      },
+      "en": {
+        "displayName": "Listen Together · NetEase Music",
+        "description": "Turn your playlist into a conversation with Coo. Track changes spark short reactions inspired by listener comments. Adjustable frequency and model-guided length, with rapid-skip protection. Unofficial Windows extension."
+      }
+    }
+  },
+  "files": [
+    "src",
+    "scripts",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "describe.json",
+    "docs",
+    "assets"
+  ],
+  "scripts": {
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "describe": "tsx scripts/describe.ts",
+    "prepack": "npm run build-icon && npm run describe",
+    "diagnose": "tsx scripts/diagnose.ts",
+    "check": "tsx scripts/check.ts",
+    "verify": "npm run typecheck && npm test && npm run describe && npm run check",
+    "check-comments": "tsx scripts/check-comments.ts",
+    "check-host": "tsx scripts/check-host.ts",
+    "build-icon": "tsx scripts/build-icon.ts",
+    "check-official": "tsx scripts/check-official.ts",
+    "prepublishOnly": "npm run verify && npm run check-official"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/node": "^22.10.0",
+    "cortico": "0.2.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": {
+    "name": "oceanxuhaiao",
+    "url": "https://github.com/oceanxuhaiao"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oceanxuhaiao/music.git"
+  },
+  "homepage": "https://github.com/oceanxuhaiao/music#readme",
+  "bugs": {
+    "url": "https://github.com/oceanxuhaiao/music/issues"
+  }
+}

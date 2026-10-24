@@ -1,0 +1,9 @@
+node_modules/
+.reference/
+*.tgz
+coverage/
+*.log
+.env
+.env.*
+.npmrc
+release/

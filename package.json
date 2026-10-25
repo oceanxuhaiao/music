@@ -1,6 +1,6 @@
 {
   "name": "cortico-world-netease-companion",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "type": "module",
   "description": "一起听，让歌单成为你和 Coo 的共同话题。切歌后参考网易云热评聊两句，评论频率与字数可调，快切不补评。Windows 非官方陪听扩展。",
   "license": "MIT",
@@ -68,7 +68,7 @@
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^22.10.0",
-    "cortico": "0.2.5",
+    "cortico": "0.2.7",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   },

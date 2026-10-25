@@ -1,5 +1,7 @@
 # Windows PowerShell 5.1; one UTF-8 JSON snapshot per two seconds.
+param([switch]$Diagnostic, [switch]$Once)
 $ErrorActionPreference = 'Stop'
+. "$PSScriptRoot/window-reader.ps1"
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
 $pattern = $env:MUSIC_SESSION_PATTERN
 if (-not $pattern) { $pattern = 'cloudmusic|netease|\u7f51\u6613\u4e91' }
@@ -24,9 +26,19 @@ try {
 while ($true) {
     $track = $null
     $readError = $initError
+    $sessions = @()
+    $sessionDetails = @()
+    $windowObservation = $null
+    $smtcError = $initError
     try {
         if ($null -ne $manager) {
-            $matches = @($manager.GetSessions() | Where-Object {
+            $sessions = @($manager.GetSessions())
+            if ($Diagnostic) {
+                $sessionDetails = @($sessions | ForEach-Object {
+                    @{ app = $_.SourceAppUserModelId; status = $_.GetPlaybackInfo().PlaybackStatus.ToString(); matched = $appRegex.IsMatch($_.SourceAppUserModelId) }
+                } | Select-Object -First 32)
+            }
+            $matches = @($sessions | Where-Object {
                 $appRegex.IsMatch($_.SourceAppUserModelId) -and $_.GetPlaybackInfo().PlaybackStatus.ToString() -ne 'Closed'
             } | Sort-Object SourceAppUserModelId | Select-Object -First 8)
             # Prefer a playing matching session; never pick an unrelated player.
@@ -48,20 +60,26 @@ while ($true) {
                 }
             }
         }
-    } catch { $readError = $_.Exception.Message; $manager = $null; $initError = $readError }
+    } catch { $readError = $_.Exception.Message; $smtcError = $readError; $manager = $null; $initError = $readError }
     if ($null -eq $track -and $env:MUSIC_WINDOW_FALLBACK -eq '1') {
         # A title alone cannot prove playback or distinguish title/artist reliably.
-        $player = Get-Process -Name cloudmusic -ErrorAction SilentlyContinue |
-            Where-Object { $_.MainWindowTitle -and $_.MainWindowTitle -match '\S.*\s[-\u2013\u2014]\s.*\S' -and $_.MainWindowTitle -notmatch '^(\u7f51\u6613\u4e91\u97f3\u4e50|NetEase Cloud Music)$' } |
-            Select-Object -First 1
-        if ($null -ne $player) {
-            $track = @{ title = $player.MainWindowTitle; artist = ''; album = '';
+        $windowObservation = Get-NeteaseWindowObservation -Diagnostic:$Diagnostic
+        if ($windowObservation.title) {
+            $track = @{ title = $windowObservation.title; artist = ''; album = '';
                 app = 'cloudmusic'; status = 'unknown'; method = 'window-title' }
         }
+        if ($windowObservation.error) { $readError = $windowObservation.error }
     }
     $result = @{ track = $track }
     if ($null -eq $track -and $readError) { $result.error = $readError }
-    [Console]::WriteLine(($result | ConvertTo-Json -Compress -Depth 4))
+    if ($Diagnostic) {
+        if ($null -eq $windowObservation) { $windowObservation = Get-NeteaseWindowObservation -Diagnostic }
+        $result.diagnostic = @{ sessionPattern = $pattern; windowFallback = ($env:MUSIC_WINDOW_FALLBACK -eq '1');
+            sessionCount = $sessions.Count; sessions = $sessionDetails; smtcError = $smtcError;
+            window = $windowObservation; reason = $(if ($track) { $track.method } elseif ($env:MUSIC_WINDOW_FALLBACK -ne '1') { 'window-fallback-disabled' } else { $windowObservation.reason }) }
+    }
+    [Console]::WriteLine(($result | ConvertTo-Json -Compress -Depth 7))
+    if ($Once) { break }
     # A failed WinRT initialization is recoverable (service restart / login / wake).
     if ($null -eq $manager) {
         try { $manager = Await-WinRT ($managerType::RequestAsync()) $managerType; $initError = '' } catch { $initError = $_.Exception.Message }

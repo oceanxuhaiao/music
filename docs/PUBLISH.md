@@ -9,7 +9,7 @@
 ## 本次发布准备
 
 包名：`cortico-world-netease-companion`（已发布）。
-本次版本：`0.3.6`。许可证：MIT。支持平台：Windows。World API：6。
+本次版本：`0.3.7`。许可证：MIT。支持平台：Windows。World API：6。目标宿主：Coopanion 0.2.9（Cortico 0.2.7）。
 
 维护账号为 oceanxuhaiao。公开源码仓库：https://github.com/oceanxuhaiao/music 。把真实作者、repository、bugs、homepage 写入 package.json；不要将他人账号或尚不存在的仓库写进去。
 
